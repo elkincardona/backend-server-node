@@ -1,12 +1,11 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
 var authMiddleware = require('../middlewares/auth');
 // var SEED = require('../config/config').SEED;
 
 var app = express();
 
-var UserModel = require('../models/user');
+var UserSchema = require('../models/user');
 
 
 // ===========================================================
@@ -14,21 +13,35 @@ var UserModel = require('../models/user');
 // ===========================================================
 app.get('/', (req, res, next) => {
     
-    UserModel.find({},'name email image role').exec( 
-        
+    var skip = req.query.skip || 0;
+    skip = Number(skip);
+
+    var limit = req.query.limit || 5;
+    limit = Number(limit);
+
+    UserSchema.find({},'name email image role')
+        .skip(skip)
+        .limit(limit)
+        .exec( 
         (err, userCollection) => {
         if (err){
             return res.status(500).json({
                 ok : false,
-                mensaje: 'error',
+                message: 'error finding data',
                 errors: err
             });
         }
-        res.status(200).json({
-            ok : true,
-            mensaje: 'request users perform correctly',
-            userCollection: userCollection 
+
+        UserSchema.countDocuments({}, (err, count) => {
+            res.status(200).json({
+                ok : true,
+                total: count,
+                collection: userCollection 
+            });
         });
+
+
+        
 
     });
 
@@ -48,7 +61,7 @@ app.get('/', (req, res, next) => {
 //         if (err) {
 //             return resp.status(401).json({
 //                 ok : false,
-//                 mensaje: 'invalid token',
+//                 message: 'invalid token',
 //                 errors: err
        
 //             });
@@ -68,18 +81,18 @@ app.put('/:id', authMiddleware.validateToken, (req, res) => {
     var body = req.body;
     var idUser = req.params.id;
 
-    UserModel.findById(idUser, (err, resp) => {
+    UserSchema.findById(idUser, (err, resp) => {
         if (err){
             return res.status(500).json({
                 ok : false,
-                mensaje: 'error when searching user',
+                message: 'error when searching user',
                 errors: err
             });
         }
         if ( !resp ) {
             return res.status(400).json({
                 ok : false,
-                mensaje: 'error when searching user with id: ' + idUser
+                message: 'user with id: ' + idUser + ' not found'
        
             });
         }
@@ -92,7 +105,7 @@ app.put('/:id', authMiddleware.validateToken, (req, res) => {
             if (err){
                 return res.status(400).json({
                     ok : false,
-                    mensaje: 'error when updating user',
+                    message: 'error updating user',
                     errors: err
                 });
             }
@@ -113,7 +126,7 @@ app.post('/', authMiddleware.validateToken , (req, res) => {
     var body = req.body;
     var salt = bcrypt.genSaltSync(10);
     
-    var user = new UserModel({
+    var user = new UserSchema({
         name: body.name,
         email: body.email,
         password: bcrypt.hashSync(body.password, salt),
@@ -126,7 +139,7 @@ app.post('/', authMiddleware.validateToken , (req, res) => {
         if (err){
             return res.status(400).json({
                 ok : false,
-                mensaje: 'error when creating user',
+                message: 'error creating user',
                 errors: err
             });
         }
@@ -148,11 +161,11 @@ app.post('/', authMiddleware.validateToken , (req, res) => {
 // ===========================================================
 app.delete('/:id', authMiddleware.validateToken, (req, res) => {
     var idUser = req.params.id;
-    UserModel.findByIdAndDelete(idUser, (err , deletedUser) => {
+    UserSchema.findByIdAndDelete(idUser, (err , deletedUser) => {
         if (err){
             return res.status(500).json({
                 ok : false,
-                mensaje: 'error when deleting user',
+                message: 'error deleting user',
                 errors: err
             });
         }
@@ -160,7 +173,7 @@ app.delete('/:id', authMiddleware.validateToken, (req, res) => {
         if ( !deletedUser ) {
             return res.status(400).json({
                 ok : false,
-                mensaje: 'there is not user with id: ' + idUser
+                message: 'there is not user with id: ' + idUser
        
             });
         }

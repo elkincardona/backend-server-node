@@ -4,6 +4,29 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 
 
+// Import paths
+var appRoutes = require('./routes/app');
+var appSearch = require('./routes/search');
+var appUsers = require('./routes/user');
+var appHospital = require('./routes/hospital');
+var appDoctor = require('./routes/doctor');
+var appUpload = require('./routes/upload');
+var appImages = require('./routes/imgs');
+var appLogin = require('./routes/login');
+
+// Init variables
+var app = express();
+
+
+
+//Server index config ========== alows explore folder in the web browser
+// var serveIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'))
+// app.use('/uploads', serveIndex(__dirname + '/uploads'));
+
+
+
+
 // Connection Mongo Db *****THE DATABASE NAME IS CASESENSITIVE
 mongoose.connect('mongodb://localhost:27017/HospitalDB', {useNewUrlParser: true }).then(
     () => {
@@ -18,25 +41,24 @@ mongoose.connect('mongodb://localhost:27017/HospitalDB', {useNewUrlParser: true 
 );
 
 
-// Init variables
-var app = express();
-
 
 // Body parser
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
-
-// Import paths
-var appRoutes = require('./routes/app');
-var appUsers = require('./routes/user');
-var appLogin = require('./routes/login');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 
 // Paths
+app.use('/doctor', appDoctor);
+app.use('/hospital', appHospital);
 app.use('/user', appUsers);
+app.use('/search', appSearch);
+app.use('/upload', appUpload);
+app.use('/img', appImages);
 app.use('/login', appLogin);
+
 app.use('/', appRoutes);
+
 
 // Express listen requeris
 app.listen(3000, () => {

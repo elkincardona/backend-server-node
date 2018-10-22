@@ -6,7 +6,7 @@ var SEED = require('../config/config').SEED;
 // ===========================================================
 // Validate token JWT  ---> middleware
 // ===========================================================
-exports.validateToken = function (req, resp, next) {
+module.exports.validateToken = function (req, resp, next) {
 
     var token = req.query.token;
     jwt.verify(token, SEED, (err, decoded) => {
@@ -14,7 +14,7 @@ exports.validateToken = function (req, resp, next) {
         if (err) {
             return resp.status(401).json({
                 ok : false,
-                mensaje: 'invalid token',
+                message: 'invalid token',
                 errors: err
        
             });
