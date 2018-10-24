@@ -17,7 +17,8 @@ var userSchema = new Schema({
     email: { type: String, required: [true, 'The email is requerid'], unique: true},
     password: { type: String, required: [true, 'The password is requerid']},
     image: { type: String, required: false},
-    role: { type: String, required: true, default: 'user_role', enum: validRoles}
+    role: { type: String, required: true, default: 'user_role', enum: validRoles},
+    google: { type: Boolean, default: false}
 });
 
 // plugin for better unique validation
