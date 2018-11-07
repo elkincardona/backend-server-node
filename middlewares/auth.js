@@ -32,3 +32,45 @@ module.exports.validateToken = function (req, resp, next) {
 
     });
 }
+
+// ===========================================================
+// Validate admin or same user
+// ===========================================================
+module.exports.validateAdminRoleorSameUser = function (req, resp, next) {
+
+    var user = req.user;
+    var id = req.params.id;
+
+    if( user.role == 'admin_role' || user._id == id) {
+        next();
+        return;
+    } else {
+        return resp.status(401).json({
+            ok : false,
+            message: 'invalid access',
+            errors: 'invalid access'
+   
+        });
+    }
+}
+
+
+// ===========================================================
+// Validate admin or same user
+// ===========================================================
+module.exports.validateAdminRole = function (req, resp, next) {
+
+    var user = req.user;
+
+    if( user.role == 'admin_role') {
+        next();
+        return;
+    } else {
+        return resp.status(401).json({
+            ok : false,
+            message: 'invalid access',
+            errors: 'invalid access'
+   
+        });
+    }
+}

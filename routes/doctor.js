@@ -38,6 +38,39 @@ app.get('/', (req, resp) => {
     });
 });
 
+
+// ==========================================
+//  Get Doctor by ID
+// ==========================================
+app.get('/:id', (req, resp) => {
+    var idDoctor = req.params.id;
+    doctorSchema.findById(idDoctor)
+        .populate('user', 'name email image ')
+        .populate('hospital')
+        .exec((err, doctor) => {
+            if (err) {
+                return resp.status(500).json({
+                    ok: false,
+                    message: 'Error searching the doctor',
+                    errors: err
+                });
+            }
+            if (!doctor) {
+                return resp.status(400).json({
+                    ok: false,
+                    message: 'The doctor with id ' + id + ' doesnt exists',
+                    errors: { message: 'Doctor doesnt exits' }
+                });
+
+            }
+            resp.status(200).json({
+                ok: true,
+                doctor: doctor
+            }); 
+        });
+});
+
+
 // ===========================================================
 // Create doctor
 // ===========================================================
@@ -142,5 +175,6 @@ app.delete('/:id', authMiddleware.validateToken, (req, resp) => {
 
     });
 });
+
 
 module.exports = app;

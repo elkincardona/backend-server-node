@@ -144,5 +144,35 @@ app.delete('/:id', authMiddleware.validateToken, (req, resp) => {
     });
 });
 
+// ==========================================
+//  Get Hospital by ID
+// ==========================================
+app.get('/:id', (req, resp) => {
+    var idHospital = req.params.id;
+    hospitalSchema.findById(idHospital)
+        .populate('user', 'name image email')
+        .exec((err, hospital) => {
+            if (err) {
+                return resp.status(500).json({
+                    ok: false,
+                    message: 'Error searching the hospital',
+                    errors: err
+                });
+            }
+            if (!hospital) {
+                return resp.status(400).json({
+                    ok: false,
+                    message: 'The hospital with id ' + id + ' doesnt exists',
+                    errors: { message: 'Hospital doesnt exists' }
+                });
+
+            }
+            resp.status(200).json({
+                ok: true,
+                hospital: hospital
+            }); 
+        });
+});
+
 
 module.exports = app;

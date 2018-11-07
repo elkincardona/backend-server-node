@@ -19,7 +19,7 @@ app.get('/', (req, res, next) => {
     var limit = req.query.limit || 5;
     limit = Number(limit);
 
-    UserSchema.find({},'name email image role')
+    UserSchema.find({},'name email image role google')
         .skip(skip)
         .limit(limit)
         .exec( 
@@ -77,7 +77,7 @@ app.get('/', (req, res, next) => {
 // ===========================================================
 // Update user
 // ===========================================================
-app.put('/:id', authMiddleware.validateToken, (req, res) => {
+app.put('/:id', [authMiddleware.validateToken, authMiddleware.validateAdminRoleorSameUser], (req, res) => {
     var body = req.body;
     var idUser = req.params.id;
 
@@ -99,7 +99,7 @@ app.put('/:id', authMiddleware.validateToken, (req, res) => {
 
         resp.name = body.name;
         resp.email = body.email;
-        res.role = body.role;
+        resp.role = body.role;
 
         resp.save( (err, savedUser) => {
             if (err){
@@ -121,7 +121,7 @@ app.put('/:id', authMiddleware.validateToken, (req, res) => {
 // ===========================================================
 // Create a new user
 // ===========================================================
-app.post('/', authMiddleware.validateToken , (req, res) => {
+app.post('/' , (req, res) => {
 
     var body = req.body;
     var salt = bcrypt.genSaltSync(10);
@@ -143,6 +143,7 @@ app.post('/', authMiddleware.validateToken , (req, res) => {
                 errors: err
             });
         }
+        savedUser.password = ':)';
         res.status(201).json({
             ok: true,
             user : savedUser
@@ -159,7 +160,7 @@ app.post('/', authMiddleware.validateToken , (req, res) => {
 // ===========================================================
 // Delete user
 // ===========================================================
-app.delete('/:id', authMiddleware.validateToken, (req, res) => {
+app.delete('/:id', [authMiddleware.validateToken, authMiddleware.validateAdminRole], (req, res) => {
     var idUser = req.params.id;
     UserSchema.findByIdAndDelete(idUser, (err , deletedUser) => {
         if (err){

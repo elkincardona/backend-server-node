@@ -59,7 +59,7 @@ app.post('/google', async (req, res) => {
         if (err){
             return res.status(500).json({
                 ok : false,
-                mensaje: 'error finding user',
+                message: 'error finding user',
                 errors: err
             });
         }
@@ -68,7 +68,7 @@ app.post('/google', async (req, res) => {
             if ( userdb.google === false) {
                 return res.status(400).json({
                     ok : false,
-                    mensaje: 'must authenticate with the normal account',
+                    message: 'must authenticate with the normal account',
                 });
             }
             else {
@@ -79,7 +79,8 @@ app.post('/google', async (req, res) => {
                     message : 'valid login post',
                     user: userdb,
                     id: userdb._id,
-                    token: token
+                    token: token,
+                    menu: getMenu(userdb.role)
                 });
             }
         } else {
@@ -98,7 +99,7 @@ app.post('/google', async (req, res) => {
                 if (err){
                     return res.status(500).json({
                         ok : false,
-                        mensaje: 'error creating user',
+                        message: 'error creating user',
                         errors: err
                     });
                 } else {
@@ -108,7 +109,8 @@ app.post('/google', async (req, res) => {
                         message : 'valid login post',
                         user: userdb,
                         id: userdb._id,
-                        token: token
+                        token: token,
+                        menu: getMenu(userdb.role)
                     });
                 }
             });
@@ -136,20 +138,20 @@ app.post('/', (req, res) => {
         if (err){
             return res.status(500).json({
                 ok : false,
-                mensaje: 'error finding user',
+                message: 'error finding user',
                 errors: err
             });
         }
         if ( !user ) {
             return res.status(400).json({
                 ok : false,
-                mensaje: 'invalid user credentials - email' 
+                message: 'invalid user credentials - email' 
             });
         }
         if ( !bcrypt.compareSync( body.password , user.password) ) {
             return res.status(400).json({
                 ok : false,
-                mensaje: 'invalid user credentials - password'
+                message: 'invalid user credentials - password'
             });
         }
 
@@ -163,18 +165,45 @@ app.post('/', (req, res) => {
             message : 'valid login post',
             user: user,
             id: user._id,
-            token: token
+            token: token,
+            menu: getMenu(user.role)
         });
     });
     
 
-
-    
-
-
-
-
 });
+
+
+function getMenu( role ) {
+    var menuOptions = [
+        {
+          tittle: 'Main',
+          icon: 'mdi mdi-gauge',
+          submenus: [
+            {tittle: 'Dashboard', icon: 'mdi mdi-gauge', url: '/dashboard'},
+            {tittle: 'Progress bar', icon: 'mdi mdi-gauge', url: '/progress'},
+            {tittle: 'Graphic', icon: 'mdi mdi-gauge', url: '/graphics1'},
+            {tittle: 'Promises', icon: 'mdi mdi-gauge', url: '/promises'},
+            {tittle: 'Rxjs', icon: 'mdi mdi-gauge', url: '/rxjs'}
+          ]
+        },
+        {
+          tittle: 'Admin',
+          icon: 'mdi mdi-folder-lock-open',
+          submenus: [
+            // {tittle: 'Users', icon: 'mdi mdi-gauge', url: '/users'},
+            {tittle: 'Doctors', icon: 'mdi mdi-gauge', url: '/doctors'},
+            {tittle: 'Hospitals', icon: 'mdi mdi-gauge', url: '/hospitals'}
+          ]
+    
+        }
+      ];
+
+      if(role == 'admin_role') {
+          menuOptions[1].submenus.unshift({tittle: 'Users', icon: 'mdi mdi-gauge', url: '/users'});
+      }
+    return menuOptions;
+}
 
 
 module.exports = app;

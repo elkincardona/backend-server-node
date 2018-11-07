@@ -22,7 +22,7 @@ var userSchema = new Schema({
 });
 
 // plugin for better unique validation
-userSchema.plugin(uniqueValidator, {message: '{PATH} will be unique'});
+userSchema.plugin(uniqueValidator, {message: 'will be unique'});
 
 module.exports = mongoose.model('user', userSchema);
 // module.exports = mongoose.model('user', userSchema, 'users'); // ***** this code go directly for the real collection  name
